@@ -1,11 +1,11 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 UPLOAD_FOLDER  = '/home/pi/context'
 
 app = Flask(__name__)
 
-def save_reg(registers):
+def save_reg(regs):
 	with open(os.path.join(UPLOAD_FOLDER, "context.txt"), "w") as f:
 		for reg in regs:
 			f.write(str(reg) + '\n')
@@ -39,8 +39,11 @@ def upload_files():
 
 	os.system("./test > response.txt")
 
+	out_regs = []
+
 	with open("response.txt") as f:
-		response = f.read()
+		for line in f:
+			out_regs.append(int(line))
 
 	f.close()
 
@@ -48,6 +51,6 @@ def upload_files():
 	os.system("rm -rf test")
 	os.system("rm -rf response.txt")
 
-	return response, 200
+	return jsonify({"registers": out_regs}), 200
 
 app.run(host='0.0.0.0', port=8080)
